@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="0Y9-44-ryY">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="OXy-nC-8YD">
+            <objects>
+                <navigationController id="0Y9-44-ryY" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="13Q-WM-YPE">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="Xd9-nu-EpW"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="rLh-hd-2hH" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1930" y="9"/>
+        </scene>
+        <!--拖拽-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="1Fm-Ya-Nta">
+                                <rect key="frame" x="0.0" y="64" width="125" height="603"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="oaa-di-V3f"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="ANB-XV-YkT"/>
+                                </connections>
+                            </tableView>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="a9g-iU-kSU" customClass="EGTableView">
+                                <rect key="frame" x="125" y="64" width="250" height="603"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="250" id="WkH-5F-hsQ"/>
+                                </constraints>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="ldR-2Q-9Xp"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="Bea-cP-VfR"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="a9g-iU-kSU" secondAttribute="bottom" id="DlR-LX-d4N"/>
+                            <constraint firstItem="1Fm-Ya-Nta" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="Zk5-4A-ZEd"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="a9g-iU-kSU" secondAttribute="trailing" id="cYs-Sb-xi3"/>
+                            <constraint firstItem="1Fm-Ya-Nta" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="eh6-FU-lMd"/>
+                            <constraint firstItem="1Fm-Ya-Nta" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="pdf-IO-ibA"/>
+                            <constraint firstItem="a9g-iU-kSU" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="pi5-0c-cW9"/>
+                            <constraint firstItem="a9g-iU-kSU" firstAttribute="leading" secondItem="1Fm-Ya-Nta" secondAttribute="trailing" id="wi6-oa-XcU"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="拖拽" id="WB4-CX-WI6"/>
+                    <connections>
+                        <outlet property="detailList" destination="a9g-iU-kSU" id="nvT-jT-VBW"/>
+                        <outlet property="fileList" destination="1Fm-Ya-Nta" id="x7v-KW-9Qs"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1042" y="9"/>
+        </scene>
+    </scenes>
+</document>
