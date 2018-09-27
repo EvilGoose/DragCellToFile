@@ -9,8 +9,23 @@
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
+@class EGDetailTableViewCell;
+
+@protocol EGDetailTableViewCellProtocal <NSObject>
+
+- (void)tableViewDidSelectedCells:(EGDetailTableViewCell *)cell;
+
+- (void)tableViewDidDeselectedCells:(EGDetailTableViewCell *)cell;
+
+- (void)cellsDidDragCell:(EGDetailTableViewCell *)cell toPoint:(CGPoint)point;
+
+@end
 
 @interface EGDetailTableViewCell : UITableViewCell
+
+@property(nonatomic,weak) id<EGDetailTableViewCellProtocal> selectDelegate;
+
+@property(nonatomic,weak) __kindof UIView *containerMask;
 
 @end
 

@@ -8,14 +8,13 @@
 
 #import "ViewController.h"
 #import "EGDetailTableViewCell.h"
-#import "EGTableView.h"
 
 @interface ViewController ()<
-UITableViewDelegate, UITableViewDataSource>
+UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 @property (weak, nonatomic) IBOutlet UITableView *fileList;
 
-@property (weak, nonatomic) IBOutlet EGTableView *detailList;
+@property (weak, nonatomic) IBOutlet UITableView *detailList;
 
 @property(nonatomic,copy) NSArray *files;
 
@@ -23,10 +22,15 @@ UITableViewDelegate, UITableViewDataSource>
 
 @property(nonatomic,copy) NSMutableArray *selectedList;
 
-@property(nonatomic,copy) NSMutableArray *animationImage;
+@property(nonatomic,copy) NSMutableArray *animationImageFrameArray;
 
-@property(nonatomic,strong) UIScrollView *maskScroll;
+@property(nonatomic,copy) NSMutableArray<UIImageView *> *animationImages;
 
+@property(nonatomic,copy) NSMutableArray<NSString *> *fileFocusArray;
+
+@property(nonatomic,strong) UIView *maskScroll;
+
+@property(nonatomic,assign) CGPoint currentFocusPoint;
 
 @end
 
@@ -40,57 +44,7 @@ UITableViewDelegate, UITableViewDataSource>
     self.navigationItem.leftBarButtonItem  = [[UIBarButtonItem alloc] initWithTitle:@"打印" style:UIBarButtonItemStylePlain target:self action:@selector(printDetail)];
     self.navigationItem.rightBarButtonItem  = [[UIBarButtonItem alloc] initWithTitle:@"编辑" style:UIBarButtonItemStylePlain target:self action:@selector(dragSwitch:)];
     self.fileList.bounces = NO;
-  
-    
-    self.detailList.pressed = ^(BOOL mark, NSArray * _Nonnull visibleCells) {
-        if (!mark){
-            [self.maskScroll.subviews enumerateObjectsUsingBlock:^(__kindof UIImageView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                [obj removeFromSuperview];
-            }];
-            [self.maskScroll removeFromSuperview];
-            [self.animationImage removeAllObjects];
-            return;
-        }
-        
-        dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            [self.selectedList enumerateObjectsUsingBlock:^(EGDetailTableViewCell *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if ([visibleCells containsObject:obj]) {
-                      [self.animationImage addObject:@{
-                                      @"frame" : NSStringFromCGRect([self.detailList convertRect:obj.frame toView:self.view]),
-                                      @"image" : [self screenShotView:obj]
-                                      }];
-                }
-            }];
-        
-            [self addImageMask];
-        });
-        
-    };
-}
-
-- (UIImage *) screenShotView:(UIView *)view{
-    UIImage *imageRet = [[UIImage alloc]init];
-    UIGraphicsBeginImageContextWithOptions(view.frame.size, false, 0.0);
-    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
-    imageRet = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return imageRet;
-}
-
-- (void)addImageMask {
-    if (self.animationImage.count == 0) {
-        return;
-    }
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.view addSubview:self.maskScroll];
-        [self.animationImage enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            UIImageView *imageView = [[UIImageView alloc]initWithImage:[obj valueForKey:@"image"]];
-            imageView.frame = CGRectMake(self.detailList.frame.origin.x, CGRectFromString([obj valueForKey:@"frame"]).origin.y - 64, CGRectFromString([obj valueForKey:@"frame"]).size.width, CGRectFromString([obj valueForKey:@"frame"]).size.height);
-            [self.maskScroll addSubview:imageView];
-        }];
-    });
+    self.fileList.allowsMultipleSelectionDuringEditing = YES;
 }
 
 - (void)printDetail {
@@ -100,9 +54,16 @@ UITableViewDelegate, UITableViewDataSource>
     self.detailList.editing = !self.detailList.editing;
     if (!self.detailList.editing) {
         self.selectedList = nil;
-        self.animationImage = nil;
+        self.animationImageFrameArray = nil;
     }
 }
+
+- (void)setCurrentFocusPoint:(CGPoint)currentFocusPoint {
+    _currentFocusPoint = currentFocusPoint;
+    NSLog(@"当前的焦点位置为 %@", NSStringFromCGPoint(currentFocusPoint));
+}
+
+#pragma mark - tableview delegate / datasource
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (!tableView.editing) {
@@ -147,13 +108,116 @@ UITableViewDelegate, UITableViewDataSource>
         EGDetailTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fileDetailCellID"];
         if (!cell) {
             cell = [[EGDetailTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"fileDetailCellID"];
-            cell.backgroundColor = [UIColor grayColor];
+            cell.backgroundColor = [UIColor greenColor];
+            cell.selectDelegate = self;
+            cell.containerMask = self.maskScroll;
         }
         cell.textLabel.text = self.details[indexPath.row];
         return  cell;
     }
-    
 }
+
+#pragma mark - private
+
+- (UIImage *) screenShotView:(UIView *)view{
+    UIImage *imageRet = [[UIImage alloc]init];
+    UIGraphicsBeginImageContextWithOptions(view.frame.size, false, 0.0);
+    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    imageRet = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return imageRet;
+}
+
+- (void)addImageMask {
+    if (self.animationImageFrameArray.count == 0) {
+        return;
+    }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.view addSubview:self.maskScroll];
+        [self.maskScroll becomeFirstResponder];
+        [self.animationImageFrameArray enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            UIImageView *imageView = [[UIImageView alloc]initWithImage:[obj valueForKey:@"image"]];
+            
+            [self.animationImages addObject:imageView];
+            
+            imageView.frame = CGRectMake(self.detailList.frame.origin.x, CGRectFromString([obj valueForKey:@"frame"]).origin.y - 64, CGRectFromString([obj valueForKey:@"frame"]).size.width, CGRectFromString([obj valueForKey:@"frame"]).size.height);
+            [self.maskScroll addSubview:imageView];
+        }];
+    });
+}
+
+- (void)startShakeAction {
+    NSLog(@"文件夹list开始抖动");
+}
+
+- (void)stopShakeAction {
+    NSLog(@"文件夹list停止抖动");
+}
+
+#pragma mark - cell selected
+
+- (void)tableViewDidSelectedCells:(EGDetailTableViewCell *)cell {
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [self.selectedList enumerateObjectsUsingBlock:^(EGDetailTableViewCell *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([self.detailList.visibleCells containsObject:obj]) {
+                [self.animationImageFrameArray addObject:@{
+                                                 @"frame" : NSStringFromCGRect([self.detailList convertRect:obj.frame toView:self.view]),
+                                                 @"image" : [self screenShotView:obj]
+                                                 }];
+            }
+        }];
+        [self addImageMask];
+    });
+    
+    [self startShakeAction];
+}
+
+- (void)tableViewDidDeselectedCells:(EGDetailTableViewCell *)cell {
+    [self.maskScroll.subviews enumerateObjectsUsingBlock:^(__kindof UIImageView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj removeFromSuperview];
+    }];
+    
+    [self.selectedList enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.alpha = 1;
+    }];
+    
+    [self.animationImages removeAllObjects];
+    [self.maskScroll removeFromSuperview];
+    [self.animationImageFrameArray removeAllObjects];
+    [self stopShakeAction];
+}
+
+- (void)cellsDidDragCell:(EGDetailTableViewCell *)cell toPoint:(CGPoint)point  {
+    double fileCenterX = 0.5 * ([UIScreen mainScreen].bounds.size.width - 250);
+    CGFloat alpha = (point.x - ([UIScreen mainScreen].bounds.size.width - 250)) / fileCenterX;
+    
+    [self.selectedList enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.alpha = alpha;
+    }];
+    
+    __block CGPoint focus;
+    __block CGFloat lenght;
+    __block CGFloat width;
+    __block CGFloat distance;
+    __block CGPoint ref;
+    [self.fileFocusArray enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        focus  = CGPointFromString(obj);
+        lenght = fabs(focus.x - point.x);
+        width = fabs(focus.y - point.y);
+        if (distance < sqrt(lenght*lenght + width*lenght) ) {
+//            self.currentFocusPoint = focus;
+            ref = focus;
+            distance = sqrt(lenght*lenght + width*lenght);
+        }
+    }];
+    
+    [self.animationImages enumerateObjectsUsingBlock:^(UIImageView *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.frame = CGRectMake(point.x, (obj.frame.origin.y - ref.y) , obj.frame.size.width, obj.frame.size.height);
+    }];
+}
+
 
 #pragma mark - lazy
 
@@ -172,17 +236,35 @@ UITableViewDelegate, UITableViewDataSource>
     return _selectedList;
 }
 
-- (NSMutableArray *)animationImage {
-    if (!_animationImage) {
-        _animationImage = [NSMutableArray array];
+- (NSMutableArray *)animationImageFrameArray {
+    if (!_animationImageFrameArray) {
+        _animationImageFrameArray = [NSMutableArray array];
     }
-    return _animationImage;
+    return _animationImageFrameArray;
 }
 
-- (UIScrollView *)maskScroll {
+- (NSMutableArray *)animationImages {
+    if (!_animationImages) {
+        _animationImages = [NSMutableArray array];
+    }
+    return _animationImages;
+}
+
+- (NSMutableArray *)fileFocusArray {
+    
+    NSMutableArray *foucusArray = [NSMutableArray array];
+    [self.fileList.visibleCells enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [foucusArray addObject:NSStringFromCGPoint(obj.center)];
+    }];
+    
+    return foucusArray;
+}
+
+- (UIView *)maskScroll {
     if (!_maskScroll) {
-        _maskScroll = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
-        _maskScroll.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0.5];
+        _maskScroll = [[UIView alloc]initWithFrame:CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        _maskScroll.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0];
+        _maskScroll.layer.masksToBounds = NO;
     }
     return _maskScroll;
 }
