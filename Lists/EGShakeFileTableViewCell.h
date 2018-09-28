@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)isFoucusedOff;
 
+- (void)addFiles:(NSArray *)files;
+
 @end
 
 NS_ASSUME_NONNULL_END

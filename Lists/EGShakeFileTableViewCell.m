@@ -53,4 +53,8 @@
     NSLog(@"Do not focused on me %@", self);
 }
 
+- (void)addFiles:(NSArray *)files {
+    //添加到对应的模型中
+}
+
 @end
