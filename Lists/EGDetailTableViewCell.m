@@ -43,35 +43,34 @@
     
     switch (press.state) {
         case UIGestureRecognizerStateBegan:
-            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidSelectedCells:)]) {
-                [self.selectDelegate tableViewDidSelectedCells:self];
+            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidSelectedCell:)]) {
+                [self.selectDelegate tableViewDidSelectedCell:self];
                 self.originPoint = [press locationInView:self];
             }
             break;
             
         case  UIGestureRecognizerStateEnded:
-            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidDeselectedCells:)]) {
-                [self.selectDelegate tableViewDidDeselectedCells:self];
+            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidDeselectedCell:)]) {
+                [self.selectDelegate tableViewDidDeselectedCell:self];
             }
             break;
             
         case  UIGestureRecognizerStateCancelled:
-            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidDeselectedCells:)]) {
-                [self.selectDelegate tableViewDidDeselectedCells:self];
+            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidDeselectedCell:)]) {
+                [self.selectDelegate tableViewDidDeselectedCell:self];
             }
             break;
 
         case  UIGestureRecognizerStateChanged:
             if ([self.selectDelegate respondsToSelector:@selector(cellsDidDragCell:toPoint:)]) {
                  if (!self.containerMask) return; 
-                 [self.selectDelegate cellsDidDragCell:self toPoint:CGPointMake([press locationInView:self.containerMask].x - self.originPoint.x,
-                                                                    [press locationInView:self.containerMask].y - self.originPoint.y)];
+                 [self.selectDelegate cellsDidDragCell:self toPoint:CGPointMake([press locationInView:self.containerMask].x,[press locationInView:self.containerMask].y)];
              }
              break;
             
         case  UIGestureRecognizerStateFailed:
-            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidDeselectedCells:)]) {
-                [self.selectDelegate tableViewDidDeselectedCells:self];
+            if ([self.selectDelegate respondsToSelector:@selector(tableViewDidDeselectedCell:)]) {
+                [self.selectDelegate tableViewDidDeselectedCell:self];
             }
             break;
         default:

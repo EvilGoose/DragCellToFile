@@ -16,6 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)finishShakeAction;
 
+- (void)isFoucusedOn;
+
+- (void)isFoucusedOff;
+
 @end
 
 NS_ASSUME_NONNULL_END

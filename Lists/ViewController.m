@@ -24,15 +24,16 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 @property(nonatomic,copy) NSMutableArray<NSIndexPath *> *selectedList;
 
-@property(nonatomic,copy) NSMutableArray<NSDictionary *> *animationImageFrameArray;
-
-@property(nonatomic,copy) NSMutableArray<UIImageView *> *animationImages;
-
 @property(nonatomic,copy) NSMutableArray<NSString *> *fileFocusArray;
 
-@property(nonatomic,strong) UIView *maskScroll;
+@property(nonatomic,strong) UIView *maskView;
 
 @property(nonatomic,assign) CGPoint currentFocusPoint;
+
+@property(nonatomic,weak) EGShakeFileTableViewCell *currentFocusCell;
+
+@property(nonatomic,strong) UIImageView *filesSelectedImageView;
+
 
 @end
 
@@ -45,6 +46,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     
     self.navigationItem.leftBarButtonItem  = [[UIBarButtonItem alloc] initWithTitle:@"打印" style:UIBarButtonItemStylePlain target:self action:@selector(printDetail)];
     self.navigationItem.rightBarButtonItem  = [[UIBarButtonItem alloc] initWithTitle:@"编辑" style:UIBarButtonItemStylePlain target:self action:@selector(dragSwitch:)];
+    
     self.fileList.bounces = NO;
     self.fileList.allowsMultipleSelectionDuringEditing = YES;
 }
@@ -56,7 +58,13 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     self.detailList.editing = !self.detailList.editing;
     if (!self.detailList.editing) {
         self.selectedList = nil;
-        self.animationImageFrameArray = nil;
+    }
+}
+
+- (void)setCurrentFocusCell:(EGShakeFileTableViewCell *)currentFocusCell {
+    if (currentFocusCell && ![currentFocusCell isEqual:_currentFocusCell]) {
+        _currentFocusCell = currentFocusCell;
+        [self.currentFocusCell isFoucusedOn];
     }
 }
 
@@ -97,7 +105,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         EGShakeFileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fileCellID"];
         if (!cell) {
             cell = [[EGShakeFileTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"fileCellID"];
-            cell.backgroundColor = [UIColor orangeColor];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
          }
         cell.textLabel.text = self.files[indexPath.row];
         return  cell;
@@ -105,9 +113,9 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         EGDetailTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fileDetailCellID"];
         if (!cell) {
             cell = [[EGDetailTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"fileDetailCellID"];
-            cell.backgroundColor = [UIColor greenColor];
             cell.selectDelegate = self;
-            cell.containerMask = self.maskScroll;
+            cell.containerMask = self.maskView;
+            cell.backgroundColor = [UIColor greenColor];
         }
         cell.textLabel.text = self.details[indexPath.row];
         return  cell;
@@ -116,70 +124,33 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 #pragma mark - private
 
-- (UIImage *) screenShotView:(__kindof UIView *)view{
-    UIImage *imageRet = [[UIImage alloc]init];
-    UIGraphicsBeginImageContextWithOptions(view.frame.size, false, 0.0);
-    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
-    imageRet = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return imageRet;
-}
-
 - (void)addImageMask {
-    if (self.animationImageFrameArray.count == 0) {
-        return;
-    }
-    
-    
-    
-    NSLog(@"self.animationImages-%lu-%@" ,(unsigned long)self.animationImages.count, self.animationImages);
-    NSLog(@"self.animationImageFrameArray-%lu-%@" ,(unsigned long)self.animationImageFrameArray.count, self.animationImageFrameArray);
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.view addSubview:self.maskScroll];
-        [self.maskScroll becomeFirstResponder];
-        [self.animationImageFrameArray enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            UIImageView *imageView = [[UIImageView alloc]initWithImage:[obj valueForKey:@"image"]];
-            
-            [self.animationImages addObject:imageView];
-            
-            imageView.frame = CGRectMake(self.detailList.frame.origin.x, CGRectFromString([obj valueForKey:@"frame"]).origin.y - 64, CGRectFromString([obj valueForKey:@"frame"]).size.width, CGRectFromString([obj valueForKey:@"frame"]).size.height);
-            [self.maskScroll addSubview:imageView];
-        }];
-    });
+    [self.view addSubview:self.maskView];
 }
 
 - (void)startShakeAction {
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj startShakeAction];
     }];
-    NSLog(@"文件夹list开始抖动");
 }
 
 - (void)stopShakeAction {
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj finishShakeAction];
     }];
-    self.animationImageFrameArray = nil;
-    NSLog(@"文件夹list停止抖动");
 }
 
 #pragma mark - cell selected
 
-- (void)tableViewDidSelectedCells:(EGDetailTableViewCell *)cell {
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-         [self addImageMask];
-    });
-    
+- (void)tableViewDidSelectedCell:(EGDetailTableViewCell *)cell {
+    [self addImageMask];
     [self startShakeAction];
+    
+    self.filesSelectedImageView.center = CGPointMake( cell.center.x - 250,  cell.center.y);
+    [self.maskView addSubview:self.filesSelectedImageView];
 }
 
-- (void)tableViewDidDeselectedCells:(EGDetailTableViewCell *)cell {
-    [self.maskScroll.subviews enumerateObjectsUsingBlock:^(__kindof UIImageView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj removeFromSuperview];
-    }];
-    
+- (void)tableViewDidDeselectedCell:(EGDetailTableViewCell *)cell {
     [self.selectedList enumerateObjectsUsingBlock:^(__kindof NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
         if ([self.detailList.visibleCells containsObject:cell]) {
@@ -187,13 +158,12 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         }
     }];
     
-    [self.animationImages removeAllObjects];
-    [self.maskScroll removeFromSuperview];
-    [self.animationImageFrameArray removeAllObjects];
+    [self.maskView removeFromSuperview];
     [self stopShakeAction];
 }
 
 - (void)cellsDidDragCell:(EGDetailTableViewCell *)cell toPoint:(CGPoint)point  {
+    
     [self.selectedList enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
         if ([self.detailList.visibleCells containsObject:cell]) {
@@ -201,15 +171,19 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         }
     }];
     
+    //可能的目的文件夹
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(__kindof EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if(CGRectContainsPoint(obj.frame, point)) {
+            NSLog(@"EGShakeFileTableViewCell %@", obj.textLabel.text);
             self.currentFocusPoint = obj.center;
-        };
-     }];
-    
-    [self.animationImages enumerateObjectsUsingBlock:^(UIImageView *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.frame = CGRectMake(point.x, obj.frame.origin.y, obj.frame.size.width, obj.frame.size.height);
+            self.currentFocusCell = obj;
+        }else {
+            [self.currentFocusCell isFoucusedOff];
+            self.currentFocusCell = nil;
+        }
     }];
+    
+    self.filesSelectedImageView.center = CGPointMake(point.x, point.y);
 }
 
 #pragma mark - lazy
@@ -232,26 +206,6 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     return _selectedList;
 }
 
-- (NSMutableArray *)animationImageFrameArray {
-    NSMutableArray *frames = [NSMutableArray array];
-    [self.selectedList enumerateObjectsUsingBlock:^(NSIndexPath *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
-        if ([self.detailList.visibleCells containsObject:cell]) {
-            [frames addObject:@{@"frame" : NSStringFromCGRect([self.detailList convertRect:cell.frame toView:self.view]),
-                                @"image" : [self screenShotView:cell]
-                                }];
-        }
-    }];
-    return frames;
-}
-
-- (NSMutableArray *)animationImages {
-    if (!_animationImages) {
-        _animationImages = [NSMutableArray array];
-    }
-    return _animationImages;
-}
-
 - (NSMutableArray *)fileFocusArray {
     NSMutableArray *foucusArray = [NSMutableArray array];
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -261,13 +215,21 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     return foucusArray;
 }
 
-- (UIView *)maskScroll {
-    if (!_maskScroll) {
-        _maskScroll = [[UIView alloc]initWithFrame:CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
-        _maskScroll.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0];
-        _maskScroll.layer.masksToBounds = NO;
+- (UIView *)maskView {
+    if (!_maskView) {
+        _maskView = [[UIView alloc]initWithFrame:CGRectMake(0, 64, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)];
+        _maskView.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.3];
+        _maskView.layer.masksToBounds = NO;
     }
-    return _maskScroll;
+    return _maskView;
+}
+
+- (UIImageView *)filesSelectedImageView {
+    if (!_filesSelectedImageView) {
+        _filesSelectedImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"selectedFiles"]];
+        _filesSelectedImageView.backgroundColor = [UIColor redColor];
+      }
+    return _filesSelectedImageView;
 }
 
 @end

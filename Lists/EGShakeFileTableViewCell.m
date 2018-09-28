@@ -23,6 +23,13 @@
     // Configure the view for the selected state
 }
 
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.backgroundColor = [UIColor orangeColor];
+    }
+    return self;
+}
+
 - (void)startShakeAction {
     CAKeyframeAnimation* anim=[CAKeyframeAnimation animation];
     anim.keyPath=@"transform.rotation";
@@ -34,6 +41,14 @@
 
 - (void)finishShakeAction {
     [self.layer removeAllAnimations];
+}
+
+- (void)isFoucusedOn {
+    self.backgroundColor = [UIColor redColor];
+}
+
+- (void)isFoucusedOff {
+    self.backgroundColor = [UIColor orangeColor];
 }
 
 @end

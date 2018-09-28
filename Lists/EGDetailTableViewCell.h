@@ -13,9 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol EGDetailTableViewCellProtocal <NSObject>
 
-- (void)tableViewDidSelectedCells:(EGDetailTableViewCell *)cell;
+- (void)tableViewDidSelectedCell:(EGDetailTableViewCell *)cell;
 
-- (void)tableViewDidDeselectedCells:(EGDetailTableViewCell *)cell;
+- (void)tableViewDidDeselectedCell:(EGDetailTableViewCell *)cell;
 
 - (void)cellsDidDragCell:(EGDetailTableViewCell *)cell toPoint:(CGPoint)point;
 
