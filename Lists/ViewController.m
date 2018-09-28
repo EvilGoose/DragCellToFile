@@ -22,7 +22,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 @property(nonatomic,copy) NSArray *details;
 
-@property(nonatomic,copy) NSMutableArray<NSIndexPath *> *selectedList;
+@property(nonatomic,copy) NSMutableArray<NSIndexPath *> *selectedPathArray;
 
 @property(nonatomic,copy) NSMutableArray<NSString *> *fileFocusArray;
 
@@ -57,14 +57,18 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 - (void)dragSwitch:(id)sender {
     self.detailList.editing = !self.detailList.editing;
     if (!self.detailList.editing) {
-        self.selectedList = nil;
+        self.selectedPathArray = nil;
     }
 }
 
 - (void)setCurrentFocusCell:(EGShakeFileTableViewCell *)currentFocusCell {
-    if (currentFocusCell && ![currentFocusCell isEqual:_currentFocusCell]) {
+    if (!_currentFocusCell) {
         _currentFocusCell = currentFocusCell;
-        [self.currentFocusCell isFoucusedOn];
+        [_currentFocusCell isFoucusedOn]; 
+    }else if(![currentFocusCell isEqual:_currentFocusCell]) {
+        [_currentFocusCell isFoucusedOff];
+         _currentFocusCell = currentFocusCell;
+        [_currentFocusCell isFoucusedOn];
     }
 }
 
@@ -76,10 +80,10 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     }
     
     if ([tableView isEqual:self.detailList]) {
-         if ([self.selectedList containsObject:indexPath]) {
-            [self.selectedList removeObject:indexPath];
+         if ([self.selectedPathArray containsObject:indexPath]) {
+            [self.selectedPathArray removeObject:indexPath];
         }else {        
-            [self.selectedList addObject:indexPath];
+            [self.selectedPathArray addObject:indexPath];
         }
     }
 }
@@ -137,6 +141,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 - (void)stopShakeAction {
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj finishShakeAction];
+        [obj isFoucusedOff];
     }];
 }
 
@@ -151,7 +156,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (void)tableViewDidDeselectedCell:(EGDetailTableViewCell *)cell {
-    [self.selectedList enumerateObjectsUsingBlock:^(__kindof NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.selectedPathArray enumerateObjectsUsingBlock:^(__kindof NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
         if ([self.detailList.visibleCells containsObject:cell]) {
             cell.alpha = 1;
@@ -164,7 +169,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 - (void)cellsDidDragCell:(EGDetailTableViewCell *)cell toPoint:(CGPoint)point  {
     
-    [self.selectedList enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.selectedPathArray enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
         if ([self.detailList.visibleCells containsObject:cell]) {
             cell.alpha = 0;
@@ -174,12 +179,8 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     //可能的目的文件夹
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(__kindof EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if(CGRectContainsPoint(obj.frame, point)) {
-            NSLog(@"EGShakeFileTableViewCell %@", obj.textLabel.text);
             self.currentFocusPoint = obj.center;
             self.currentFocusCell = obj;
-        }else {
-            [self.currentFocusCell isFoucusedOff];
-            self.currentFocusCell = nil;
         }
     }];
     
@@ -199,11 +200,11 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
              @"文件31", @"文件32", @"文件33", @"文件34", @"文件35", @"文件36", @"文件37", @"文件38", @"文件39", @"文件40"];
 }
 
-- (NSMutableArray *)selectedList {
-    if (!_selectedList) {
-        _selectedList = [NSMutableArray array];
+- (NSMutableArray *)selectedPathArray {
+    if (!_selectedPathArray) {
+        _selectedPathArray = [NSMutableArray array];
     }
-    return _selectedList;
+    return _selectedPathArray;
 }
 
 - (NSMutableArray *)fileFocusArray {

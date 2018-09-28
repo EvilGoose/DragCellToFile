@@ -45,10 +45,12 @@
 
 - (void)isFoucusedOn {
     self.backgroundColor = [UIColor redColor];
+    NSLog(@"Focused on me %@", self);
 }
 
 - (void)isFoucusedOff {
     self.backgroundColor = [UIColor orangeColor];
+    NSLog(@"Do not focused on me %@", self);
 }
 
 @end
