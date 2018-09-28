@@ -14,6 +14,7 @@
 		91B56C45215A253F0062E45C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 91B56C43215A253F0062E45C /* LaunchScreen.storyboard */; };
 		91B56C48215A253F0062E45C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 91B56C47215A253F0062E45C /* main.m */; };
 		91B56C53215A2D900062E45C /* EGDetailTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91B56C52215A2D900062E45C /* EGDetailTableViewCell.m */; };
+		91C588E0215CD35400ACBF74 /* EGShakeFileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91C588DF215CD35400ACBF74 /* EGShakeFileTableViewCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,8 @@
 		91B56C47215A253F0062E45C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		91B56C51215A2D900062E45C /* EGDetailTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EGDetailTableViewCell.h; sourceTree = "<group>"; };
 		91B56C52215A2D900062E45C /* EGDetailTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EGDetailTableViewCell.m; sourceTree = "<group>"; };
+		91C588DE215CD35400ACBF74 /* EGShakeFileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EGShakeFileTableViewCell.h; sourceTree = "<group>"; };
+		91C588DF215CD35400ACBF74 /* EGShakeFileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EGShakeFileTableViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +68,8 @@
 				91B56C39215A253C0062E45C /* AppDelegate.m */,
 				91B56C3B215A253C0062E45C /* ViewController.h */,
 				91B56C3C215A253C0062E45C /* ViewController.m */,
+				91C588DE215CD35400ACBF74 /* EGShakeFileTableViewCell.h */,
+				91C588DF215CD35400ACBF74 /* EGShakeFileTableViewCell.m */,
 				91B56C51215A2D900062E45C /* EGDetailTableViewCell.h */,
 				91B56C52215A2D900062E45C /* EGDetailTableViewCell.m */,
 				91B56C3E215A253C0062E45C /* Main.storyboard */,
@@ -147,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				91B56C3D215A253C0062E45C /* ViewController.m in Sources */,
+				91C588E0215CD35400ACBF74 /* EGShakeFileTableViewCell.m in Sources */,
 				91B56C48215A253F0062E45C /* main.m in Sources */,
 				91B56C3A215A253C0062E45C /* AppDelegate.m in Sources */,
 				91B56C53215A2D900062E45C /* EGDetailTableViewCell.m in Sources */,

@@ -7,6 +7,8 @@
 //
 
 #import "ViewController.h"
+
+#import "EGShakeFileTableViewCell.h"
 #import "EGDetailTableViewCell.h"
 
 @interface ViewController ()<
@@ -20,9 +22,9 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 @property(nonatomic,copy) NSArray *details;
 
-@property(nonatomic,copy) NSMutableArray *selectedList;
+@property(nonatomic,copy) NSMutableArray<NSIndexPath *> *selectedList;
 
-@property(nonatomic,copy) NSMutableArray *animationImageFrameArray;
+@property(nonatomic,copy) NSMutableArray<NSDictionary *> *animationImageFrameArray;
 
 @property(nonatomic,copy) NSMutableArray<UIImageView *> *animationImages;
 
@@ -58,11 +60,6 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     }
 }
 
-- (void)setCurrentFocusPoint:(CGPoint)currentFocusPoint {
-    _currentFocusPoint = currentFocusPoint;
-    NSLog(@"当前的焦点位置为 %@", NSStringFromCGPoint(currentFocusPoint));
-}
-
 #pragma mark - tableview delegate / datasource
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -71,10 +68,10 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     }
     
     if ([tableView isEqual:self.detailList]) {
-         if ([self.selectedList containsObject:[tableView cellForRowAtIndexPath:indexPath]]) {
-            [self.selectedList removeObject:[tableView cellForRowAtIndexPath:indexPath]];
+         if ([self.selectedList containsObject:indexPath]) {
+            [self.selectedList removeObject:indexPath];
         }else {        
-            [self.selectedList addObject:[tableView cellForRowAtIndexPath:indexPath]];
+            [self.selectedList addObject:indexPath];
         }
     }
 }
@@ -95,11 +92,11 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     }
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if ([tableView isEqual:self.fileList]) {
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fileCellID"];
+        EGShakeFileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"fileCellID"];
         if (!cell) {
-            cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"fileCellID"];
+            cell = [[EGShakeFileTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"fileCellID"];
             cell.backgroundColor = [UIColor orangeColor];
          }
         cell.textLabel.text = self.files[indexPath.row];
@@ -119,7 +116,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 #pragma mark - private
 
-- (UIImage *) screenShotView:(UIView *)view{
+- (UIImage *) screenShotView:(__kindof UIView *)view{
     UIImage *imageRet = [[UIImage alloc]init];
     UIGraphicsBeginImageContextWithOptions(view.frame.size, false, 0.0);
     [view.layer renderInContext:UIGraphicsGetCurrentContext()];
@@ -134,6 +131,11 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         return;
     }
     
+    
+    
+    NSLog(@"self.animationImages-%lu-%@" ,(unsigned long)self.animationImages.count, self.animationImages);
+    NSLog(@"self.animationImageFrameArray-%lu-%@" ,(unsigned long)self.animationImageFrameArray.count, self.animationImageFrameArray);
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.view addSubview:self.maskScroll];
         [self.maskScroll becomeFirstResponder];
@@ -149,10 +151,17 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (void)startShakeAction {
+    [self.fileList.visibleCells enumerateObjectsUsingBlock:^(EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj startShakeAction];
+    }];
     NSLog(@"文件夹list开始抖动");
 }
 
 - (void)stopShakeAction {
+    [self.fileList.visibleCells enumerateObjectsUsingBlock:^(EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj finishShakeAction];
+    }];
+    self.animationImageFrameArray = nil;
     NSLog(@"文件夹list停止抖动");
 }
 
@@ -160,15 +169,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 - (void)tableViewDidSelectedCells:(EGDetailTableViewCell *)cell {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [self.selectedList enumerateObjectsUsingBlock:^(EGDetailTableViewCell *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([self.detailList.visibleCells containsObject:obj]) {
-                [self.animationImageFrameArray addObject:@{
-                                                 @"frame" : NSStringFromCGRect([self.detailList convertRect:obj.frame toView:self.view]),
-                                                 @"image" : [self screenShotView:obj]
-                                                 }];
-            }
-        }];
-        [self addImageMask];
+         [self addImageMask];
     });
     
     [self startShakeAction];
@@ -179,8 +180,11 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         [obj removeFromSuperview];
     }];
     
-    [self.selectedList enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.alpha = 1;
+    [self.selectedList enumerateObjectsUsingBlock:^(__kindof NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
+        if ([self.detailList.visibleCells containsObject:cell]) {
+            cell.alpha = 1;
+        }
     }];
     
     [self.animationImages removeAllObjects];
@@ -190,34 +194,23 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (void)cellsDidDragCell:(EGDetailTableViewCell *)cell toPoint:(CGPoint)point  {
-    double fileCenterX = 0.5 * ([UIScreen mainScreen].bounds.size.width - 250);
-    CGFloat alpha = (point.x - ([UIScreen mainScreen].bounds.size.width - 250)) / fileCenterX;
-    
-    [self.selectedList enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.alpha = alpha;
-    }];
-    
-    __block CGPoint focus;
-    __block CGFloat lenght;
-    __block CGFloat width;
-    __block CGFloat distance;
-    __block CGPoint ref;
-    [self.fileFocusArray enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        focus  = CGPointFromString(obj);
-        lenght = fabs(focus.x - point.x);
-        width = fabs(focus.y - point.y);
-        if (distance < sqrt(lenght*lenght + width*lenght) ) {
-//            self.currentFocusPoint = focus;
-            ref = focus;
-            distance = sqrt(lenght*lenght + width*lenght);
+    [self.selectedList enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
+        if ([self.detailList.visibleCells containsObject:cell]) {
+            cell.alpha = 0;
         }
     }];
     
+    [self.fileList.visibleCells enumerateObjectsUsingBlock:^(__kindof EGShakeFileTableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if(CGRectContainsPoint(obj.frame, point)) {
+            self.currentFocusPoint = obj.center;
+        };
+     }];
+    
     [self.animationImages enumerateObjectsUsingBlock:^(UIImageView *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.frame = CGRectMake(point.x, (obj.frame.origin.y - ref.y) , obj.frame.size.width, obj.frame.size.height);
+        obj.frame = CGRectMake(point.x, obj.frame.origin.y, obj.frame.size.width, obj.frame.size.height);
     }];
 }
-
 
 #pragma mark - lazy
 
@@ -226,7 +219,10 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (NSArray *)details {
-    return @[@"文件1", @"文件2", @"文件3", @"文件4", @"文件5", @"文件6", @"文件7", @"文件8", @"文件9", @"文件10", @"文件11", @"文件12", @"文件13", @"文件14", @"文件15", @"文件1", @"文件2", @"文件3", @"文件4", @"文件5", @"文件6", @"文件7", @"文件8", @"文件9", @"文件10", @"文件11", @"文件12", @"文件13", @"文件14", @"文件15"];
+    return @[@"文件1", @"文件2", @"文件3", @"文件4", @"文件5", @"文件6", @"文件7", @"文件8", @"文件9", @"文件10",
+             @"文件11", @"文件12", @"文件13", @"文件14", @"文件15", @"文件16", @"文件17", @"文件18", @"文件19", @"文件20",
+             @"文件21", @"文件22", @"文件23", @"文件24", @"文件25", @"文件26", @"文件27", @"文件28", @"文件29", @"文件30",
+             @"文件31", @"文件32", @"文件33", @"文件34", @"文件35", @"文件36", @"文件37", @"文件38", @"文件39", @"文件40"];
 }
 
 - (NSMutableArray *)selectedList {
@@ -237,10 +233,16 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (NSMutableArray *)animationImageFrameArray {
-    if (!_animationImageFrameArray) {
-        _animationImageFrameArray = [NSMutableArray array];
-    }
-    return _animationImageFrameArray;
+    NSMutableArray *frames = [NSMutableArray array];
+    [self.selectedList enumerateObjectsUsingBlock:^(NSIndexPath *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        EGDetailTableViewCell *cell = [self.detailList cellForRowAtIndexPath:obj];
+        if ([self.detailList.visibleCells containsObject:cell]) {
+            [frames addObject:@{@"frame" : NSStringFromCGRect([self.detailList convertRect:cell.frame toView:self.view]),
+                                @"image" : [self screenShotView:cell]
+                                }];
+        }
+    }];
+    return frames;
 }
 
 - (NSMutableArray *)animationImages {
@@ -251,7 +253,6 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (NSMutableArray *)fileFocusArray {
-    
     NSMutableArray *foucusArray = [NSMutableArray array];
     [self.fileList.visibleCells enumerateObjectsUsingBlock:^(__kindof UITableViewCell * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [foucusArray addObject:NSStringFromCGPoint(obj.center)];
