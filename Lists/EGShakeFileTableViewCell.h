@@ -7,10 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@class NextViewController;
 NS_ASSUME_NONNULL_BEGIN
 
 @interface EGShakeFileTableViewCell : UITableViewCell
+
+@property(nonatomic,strong) NextViewController *nextController;
 
 - (void)startShakeAction;
 
@@ -20,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)isFoucusedOff;
 
-- (void)addFiles:(NSArray *)files;
+- (void)uploadFiles:(NSArray *)files;
 
 @end
 

@@ -15,6 +15,7 @@
 		91B56C48215A253F0062E45C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 91B56C47215A253F0062E45C /* main.m */; };
 		91B56C53215A2D900062E45C /* EGDetailTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91B56C52215A2D900062E45C /* EGDetailTableViewCell.m */; };
 		91C588E0215CD35400ACBF74 /* EGShakeFileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91C588DF215CD35400ACBF74 /* EGShakeFileTableViewCell.m */; };
+		91EBF374215E1F8D00016D78 /* NextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91EBF373215E1F8D00016D78 /* NextViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,8 @@
 		91B56C52215A2D900062E45C /* EGDetailTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EGDetailTableViewCell.m; sourceTree = "<group>"; };
 		91C588DE215CD35400ACBF74 /* EGShakeFileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EGShakeFileTableViewCell.h; sourceTree = "<group>"; };
 		91C588DF215CD35400ACBF74 /* EGShakeFileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EGShakeFileTableViewCell.m; sourceTree = "<group>"; };
+		91EBF372215E1F8D00016D78 /* NextViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NextViewController.h; sourceTree = "<group>"; };
+		91EBF373215E1F8D00016D78 /* NextViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NextViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +71,8 @@
 				91B56C39215A253C0062E45C /* AppDelegate.m */,
 				91B56C3B215A253C0062E45C /* ViewController.h */,
 				91B56C3C215A253C0062E45C /* ViewController.m */,
+				91EBF372215E1F8D00016D78 /* NextViewController.h */,
+				91EBF373215E1F8D00016D78 /* NextViewController.m */,
 				91C588DE215CD35400ACBF74 /* EGShakeFileTableViewCell.h */,
 				91C588DF215CD35400ACBF74 /* EGShakeFileTableViewCell.m */,
 				91B56C51215A2D900062E45C /* EGDetailTableViewCell.h */,
@@ -152,6 +157,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				91B56C3D215A253C0062E45C /* ViewController.m in Sources */,
+				91EBF374215E1F8D00016D78 /* NextViewController.m in Sources */,
 				91C588E0215CD35400ACBF74 /* EGShakeFileTableViewCell.m in Sources */,
 				91B56C48215A253F0062E45C /* main.m in Sources */,
 				91B56C3A215A253C0062E45C /* AppDelegate.m in Sources */,
@@ -298,7 +304,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NXUQZ8YP3C;
+				DEVELOPMENT_TEAM = YSP53GL6F6;
 				INFOPLIST_FILE = Lists/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -307,7 +313,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = evilgoose.com.cn.hb.Lists;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -316,7 +322,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = NXUQZ8YP3C;
+				DEVELOPMENT_TEAM = YSP53GL6F6;
 				INFOPLIST_FILE = Lists/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -325,7 +331,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = evilgoose.com.cn.hb.Lists;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

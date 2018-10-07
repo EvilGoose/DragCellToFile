@@ -7,6 +7,7 @@
 //
 
 #import "EGShakeFileTableViewCell.h"
+#import "NextViewController.h"
 
 #define angelToRandian(x)  ((x)/180.0*M_PI)
 
@@ -53,8 +54,9 @@
     NSLog(@"Do not focused on me %@", self);
 }
 
-- (void)addFiles:(NSArray *)files {
-    //添加到对应的模型中
+- (void)uploadFiles:(NSArray *)files {
+    //需要上传
+//    self.nextController.uploadFiles = files;
 }
 
 @end

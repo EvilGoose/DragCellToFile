@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "NextViewController.h"
 
 #import "EGShakeFileTableViewCell.h"
 #import "EGDetailTableViewCell.h"
@@ -52,6 +53,7 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 }
 
 - (void)printDetail {
+    NSLog(@"当前选中的 %@", self.selectedPathArray);
 }
 
 - (void)dragSwitch:(id)sender {
@@ -75,15 +77,33 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 #pragma mark - tableview delegate / datasource
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (!tableView.editing) {
-        return;
-    }
     
     if ([tableView isEqual:self.detailList]) {
-         if ([self.selectedPathArray containsObject:indexPath]) {
-            [self.selectedPathArray removeObject:indexPath];
-        }else {        
+        if (!tableView.editing) {
+            return;
+        }
+        
+        if (![self.selectedPathArray containsObject:indexPath]) {
             [self.selectedPathArray addObject:indexPath];
+        }
+    }else {
+        NextViewController *nextController = [NextViewController new];
+        EGShakeFileTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        nextController.theTitle = cell.textLabel.text;
+        cell.nextController = nextController;
+        [self.navigationController pushViewController:nextController animated:YES];
+    }
+}
+
+- (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    if ([tableView isEqual:self.detailList]) {
+        if (!tableView.editing) {
+            return;
+        }
+        
+        if ([self.selectedPathArray containsObject:indexPath]) {
+            [self.selectedPathArray removeObject:indexPath];
         }
     }
 }
@@ -157,7 +177,6 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 
 - (void)tableViewDidDeselectedCell:(EGDetailTableViewCell *)cell {
     if (self.currentFocusCell) {
-        
         NSMutableArray *temp = [NSMutableArray array];
         
         [self.selectedPathArray enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -166,10 +185,8 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
         
         [self.details  removeObjectsInArray:temp];
         
-        NSLog(@"self.detailList %@", self.detailList);
- 
         [self.detailList reloadData];
-        [self.currentFocusCell addFiles:self.selectedPathArray];
+        [self.currentFocusCell uploadFiles:self.selectedPathArray];
         [self.selectedPathArray removeAllObjects];
     }else {
         [self.selectedPathArray enumerateObjectsUsingBlock:^(__kindof NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -261,4 +278,5 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
     return _filesSelectedImageView;
 }
 
+ 
 @end
