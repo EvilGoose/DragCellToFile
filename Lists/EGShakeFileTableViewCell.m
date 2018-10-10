@@ -7,8 +7,7 @@
 //
 
 #import "EGShakeFileTableViewCell.h"
-#import "NextViewController.h"
-
+ 
 #define angelToRandian(x)  ((x)/180.0*M_PI)
 
 @implementation EGShakeFileTableViewCell

@@ -43,10 +43,10 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    self.automaticallyAdjustsScrollViewInsets = NO;
     
     self.navigationItem.leftBarButtonItem  = [[UIBarButtonItem alloc] initWithTitle:@"打印" style:UIBarButtonItemStylePlain target:self action:@selector(printDetail)];
     self.navigationItem.rightBarButtonItem  = [[UIBarButtonItem alloc] initWithTitle:@"编辑" style:UIBarButtonItemStylePlain target:self action:@selector(dragSwitch:)];
+    self.automaticallyAdjustsScrollViewInsets = NO;
     
     self.fileList.bounces = NO;
     self.fileList.allowsMultipleSelectionDuringEditing = YES;
@@ -178,14 +178,15 @@ UITableViewDelegate, UITableViewDataSource, EGDetailTableViewCellProtocal>
 - (void)tableViewDidDeselectedCell:(EGDetailTableViewCell *)cell {
     if (self.currentFocusCell) {
         NSMutableArray *temp = [NSMutableArray array];
-        
+
         [self.selectedPathArray enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [temp addObject:self.details[obj.row]];
         }];
-        
+
         [self.details  removeObjectsInArray:temp];
-        
         [self.detailList reloadData];
+        
+ 
         [self.currentFocusCell uploadFiles:self.selectedPathArray];
         [self.selectedPathArray removeAllObjects];
     }else {
